@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<title>Hit test overlapping 3d elements</title>
+<link rel="help" href="https://svgwg.org/svg2-draft/interact.html#hit-testing">
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+
+<style type="text/css" media="screen">
+  body {
+    margin: 0;
+  }
+
+  .test {
+    display: inline-block;
+    height: 300px;
+    width: 300px;
+    margin: 20px;
+  }
+
+  .container {
+    position: relative;
+    height: 260px;
+    width: 260px;
+    margin: 20px;
+  }
+
+  .box {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    height: 100px;
+    width: 200px;
+    transform: translateZ(20px);
+  }
+
+  #box1 {
+    background-color: #DDD;
+  }
+
+  #box2 {
+    background-color: #CCC;
+  }
+
+  #box3 {
+    background-color: #BBB;
+    top: 60px;
+  }
+
+  #box4 {
+    background-color: #AAA;
+    top: 100px;
+  }
+</style>
+
+<body>
+  <div class="test">
+    <div class="container" id="box1">
+      <div class="box" id="box2"></div>
+      <div class="box" id="box3"></div>
+      <div class="box" id="box4"></div>
+    </div>
+  </div>
+</body>
+
+<script>
+  const offset = 10;
+  const tests = [{
+      x: box1.getBoundingClientRect().x + offset,
+      y: box1.getBoundingClientRect().y + offset,
+      expectedElemId: 'box1',
+      expectedOffsetX: offset,
+      expectedOffsetY: offset,
+    },
+    {
+      x: box2.getBoundingClientRect().x + offset,
+      y: box2.getBoundingClientRect().y + offset,
+      expectedElemId: 'box2',
+      expectedOffsetX: offset,
+      expectedOffsetY: offset,
+    },
+    {
+      x: box3.getBoundingClientRect().x + offset,
+      y: box3.getBoundingClientRect().y + offset,
+      expectedElemId: 'box3',
+      expectedOffsetX: offset,
+      expectedOffsetY: offset,
+    },
+    {
+      x: box4.getBoundingClientRect().x + offset,
+      y: box4.getBoundingClientRect().y + offset,
+      expectedElemId: 'box4',
+      expectedOffsetX: offset,
+      expectedOffsetY: offset,
+    },
+  ];
+
+  const assert_offsets = (event) => {
+    assert_equals(event.offsetX, event.expectedOffsetX, "event.offsetX vs expectedOffsetX");
+    assert_equals(event.offsetY, event.expectedOffsetY, "event.offsetY vs expectedOffsetY");
+  };
+  for (const box of [box1, box2, box3, box4]) {
+    box.addEventListener("click", assert_offsets);
+  }
+
+  tests.forEach(testcase => {
+    test(t => {
+      var ev = new MouseEvent("click", {
+        clientX: testcase.x,
+        clientY: testcase.y,
+      });
+      ev.expectedElement = testcase.expectedElementID;
+      ev.expectedOffsetX = testcase.expectedOffsetX;
+      ev.expectedOffsetY = testcase.expectedOffsetY;
+      document.elementFromPoint(ev.pageX, ev.pageY).dispatchEvent(ev);
+
+      const expectedElem = document.getElementById(testcase.expectedElemId);
+      const hitElem = document.elementFromPoint(testcase.x, testcase.y);
+      assert_equals(hitElem, expectedElem, "elementId hittest");
+    }, `${document.title}, element at (${testcase.x}, ${testcase.y})`);
+  });
+</script>
+
+</html>
