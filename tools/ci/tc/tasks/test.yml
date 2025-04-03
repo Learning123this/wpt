@@ -65,6 +65,7 @@ components:
       --no-fail-on-unexpected
       --this-chunk=${chunks.id}
       --total-chunks=${chunks.total}
+      --run-by-dir=3
       --test-type=${vars.suite}
 
   trigger-master:
